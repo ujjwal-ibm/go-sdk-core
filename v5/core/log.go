@@ -74,7 +74,7 @@ type SDKLoggerImpl struct {
 	errorInit sync.Once
 
 	// Sanitization
-	sanitizationEnabled *bool
+	sanitizationEnabled bool
 }
 
 // SetLogLevel sets level to be the current logging level
@@ -89,12 +89,12 @@ func (l *SDKLoggerImpl) GetLogLevel() LogLevel {
 
 // IsSanitizationEnabled gets if sanitization is enabled
 func (l *SDKLoggerImpl) GetSanitizationEnabled() bool {
-	return *l.sanitizationEnabled
+	return l.sanitizationEnabled
 }
 
 // EnableSanitization will enable hiding of private fields in the Go core library.
 func (l *SDKLoggerImpl) SetSanitizationEnabled(flag *bool) {
-	l.sanitizationEnabled = flag
+	l.sanitizationEnabled = *flag
 }
 
 // IsLogLevelEnabled returns true iff the logger's current logging level
