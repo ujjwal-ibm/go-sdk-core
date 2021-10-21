@@ -44,6 +44,8 @@ type Logger interface {
 	SetLogLevel(level LogLevel)
 	GetLogLevel() LogLevel
 	IsLogLevelEnabled(level LogLevel) bool
+	SetSanitizationEnabled(flag bool)
+	GetSanitizationEnabled() bool
 }
 
 // SDKLoggerImpl is the Go core's implementation of the Logger interface.
@@ -70,6 +72,9 @@ type SDKLoggerImpl struct {
 	// These are used to initialize the loggers above.
 	infoInit  sync.Once
 	errorInit sync.Once
+
+	// Sanitization
+	sanitizationEnabled *bool
 }
 
 // SetLogLevel sets level to be the current logging level
@@ -80,6 +85,16 @@ func (l *SDKLoggerImpl) SetLogLevel(level LogLevel) {
 // GetLogLevel sets level to be the current logging level
 func (l *SDKLoggerImpl) GetLogLevel() LogLevel {
 	return l.logLevel
+}
+
+// IsSanitizationEnabled gets if sanitization is enabled
+func (l *SDKLoggerImpl) GetSanitizationEnabled() bool {
+	return *l.sanitizationEnabled
+}
+
+// EnableSanitization will enable hiding of private fields in the Go core library.
+func (l *SDKLoggerImpl) SetSanitizationEnabled(flag *bool) {
+	l.sanitizationEnabled = flag
 }
 
 // IsLogLevelEnabled returns true iff the logger's current logging level

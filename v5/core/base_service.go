@@ -283,6 +283,23 @@ func (service *BaseService) SetUserAgent(userAgentString string) {
 	service.UserAgent = userAgentString
 }
 
+// Sanitize returns a clean string with sensitive user data in the input
+// replaced by PRIVATE_DATA_PLACEHOLDER.
+func Sanitize(input string) string {
+	var privateDataPlaceholder = "[PRIVATE DATA HIDDEN]"
+
+	re := regexp.MustCompile(`(?m)^(Authorization|X-Auth\S*): .*`)
+	sanitized := re.ReplaceAllString(input, "$1: "+privateDataPlaceholder)
+
+	re = regexp.MustCompile(`(?i)(password|token|apikey|passcode)=[^&]*(&|$)`)
+	sanitized = re.ReplaceAllString(sanitized, "$1="+privateDataPlaceholder+"$2")
+
+	re = regexp.MustCompile(`(?i)"([^"]*(password|token|apikey)[^"_]*)":\s*"[^\,]*"`)
+	sanitized = re.ReplaceAllString(sanitized, fmt.Sprintf(`"$1":"%s"`, privateDataPlaceholder))
+
+	return sanitized
+}
+
 //
 // Request invokes the specified HTTP request and returns the response.
 //
@@ -342,7 +359,11 @@ func (service *BaseService) Request(req *http.Request, result interface{}) (deta
 	if GetLogger().IsLogLevelEnabled(LevelDebug) {
 		buf, dumpErr := httputil.DumpRequestOut(req, req.Body != nil)
 		if dumpErr == nil {
-			GetLogger().Debug("Request:\n%s\n", string(buf))
+			if GetLogger().GetSanitizationEnabled() {
+				GetLogger().Debug("Request:\n%s\n", Sanitize(string(buf)))
+			} else {
+				GetLogger().Debug("Request:\n%s\n", string(buf))
+			}
 		} else {
 			GetLogger().Debug("error while attempting to log outbound request: %s", dumpErr.Error())
 		}
