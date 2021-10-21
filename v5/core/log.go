@@ -44,7 +44,7 @@ type Logger interface {
 	SetLogLevel(level LogLevel)
 	GetLogLevel() LogLevel
 	IsLogLevelEnabled(level LogLevel) bool
-	SetSanitizationEnabled(flag bool)
+	SetSanitizationEnabled(flag *bool)
 	GetSanitizationEnabled() bool
 }
 
